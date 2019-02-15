@@ -1,4 +1,5 @@
 var mapboxAccessToken = {accessToken}
+
 var map = L.map('map').setView([37.8, -96], 4)
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mapboxAccessToken, {
@@ -31,3 +32,41 @@ function style(feature) {
 }
 
 L.geoJson(statesData, {style: style}).addTo(map)
+
+function highlightFeature(e) {
+    var layer = e.target
+
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    })
+
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront()
+    }
+}
+
+function resetHighlight(e) {
+    geojson.resetStyle(e.target)
+}
+
+var geojson
+
+function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds())
+}
+
+function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+    })
+}
+
+geojson = L.geoJson(statesData, {
+    style: style,
+    onEachFeature: onEachFeature
+}).addTo(map)
