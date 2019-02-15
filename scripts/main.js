@@ -46,10 +46,13 @@ function highlightFeature(e) {
     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
         layer.bringToFront()
     }
+
+    info.update(layer.feature.properties)
 }
 
 function resetHighlight(e) {
     geojson.resetStyle(e.target)
+    info.update()
 }
 
 var geojson
@@ -70,3 +73,34 @@ geojson = L.geoJson(statesData, {
     style: style,
     onEachFeature: onEachFeature
 }).addTo(map)
+
+var info = L.control()
+
+info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info')
+    this.update()
+    return this._div
+}
+
+info.update = function (props) {
+    this._div.innerHTML = '<h4>US Popuplation Density</h4>' + (props ? '<b>' + props.name + '</b><br>' + props.density + ' people / mi<sup>2</sup>' : 'Hover over a state')
+}
+
+info.addTo(map)
+
+var legend = L.control({position: 'bottomright'})
+
+legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+        labels = []
+
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML += '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' + grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+')
+    }
+
+    return div
+}
+
+legend.addTo(map)
